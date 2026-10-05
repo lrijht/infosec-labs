@@ -15,6 +15,12 @@ std::string run(const std::string &op, const std::string &a, const std::string &
     if (op == "cmp") {
         return std::to_string(compare(from_decimal(a), from_decimal(b)));
     }
+    if (op == "add") {
+        return to_decimal(add(from_decimal(a), from_decimal(b)));
+    }
+    if (op == "sub") {
+        return to_decimal(sub(from_decimal(a), from_decimal(b)));
+    }
     throw std::runtime_error("unknown op: " + op);
 }
 

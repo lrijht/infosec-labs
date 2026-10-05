@@ -32,6 +32,16 @@ def main():
         for b in values:
             lines.append(line("cmp", a, b, None, (a > b) - (a < b)))
 
+    for a in values:
+        for b in values:
+            lines.append(line("add", a, b, None, a + b))
+    lines.append(line("add", 2**96 - 1, 1, None, 2**96))
+
+    for a in values:
+        for b in values:
+            lines.append(line("sub", a, b, None, a - b if a >= b else "error"))
+    lines.append(line("sub", 2**96, 1, None, 2**96 - 1))
+
     out = Path(__file__).with_name("vectors.txt")
     out.write_text("\n".join(lines) + "\n", newline="\n")
 

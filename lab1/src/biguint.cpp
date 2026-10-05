@@ -7,6 +7,12 @@ namespace {
 constexpr std::uint32_t chunk_base = 1000000000;
 constexpr int chunk_digits = 9;
 
+void trim(std::vector<std::uint32_t> &limbs) {
+    while (!limbs.empty() && limbs.back() == 0) {
+        limbs.pop_back();
+    }
+}
+
 } // namespace
 
 BigUInt from_decimal(const std::string &s) {
@@ -44,9 +50,7 @@ std::string to_decimal(const BigUInt &x) {
             n[i] = static_cast<std::uint32_t>(cur / chunk_base);
             rem = cur % chunk_base;
         }
-        while (!n.empty() && n.back() == 0) {
-            n.pop_back();
-        }
+        trim(n);
         chunks.push_back(static_cast<std::uint32_t>(rem));
     }
     std::string s = std::to_string(chunks.back());
@@ -67,4 +71,49 @@ int compare(const BigUInt &a, const BigUInt &b) {
         }
     }
     return 0;
+}
+
+BigUInt add(const BigUInt &a, const BigUInt &b) {
+    const BigUInt &longer = a.limbs.size() >= b.limbs.size() ? a : b;
+    const BigUInt &shorter = a.limbs.size() >= b.limbs.size() ? b : a;
+    BigUInt r;
+    r.limbs.reserve(longer.limbs.size() + 1);
+    std::uint64_t carry = 0;
+    for (std::size_t i = 0; i < longer.limbs.size(); ++i) {
+        std::uint64_t cur = longer.limbs[i] + carry;
+        if (i < shorter.limbs.size()) {
+            cur += shorter.limbs[i];
+        }
+        r.limbs.push_back(static_cast<std::uint32_t>(cur));
+        carry = cur >> 32;
+    }
+    if (carry != 0) {
+        r.limbs.push_back(static_cast<std::uint32_t>(carry));
+    }
+    return r;
+}
+
+BigUInt sub(const BigUInt &a, const BigUInt &b) {
+    if (compare(a, b) < 0) {
+        throw std::invalid_argument("sub: minuend is less than subtrahend");
+    }
+    BigUInt r;
+    r.limbs.reserve(a.limbs.size());
+    std::uint64_t borrow = 0;
+    for (std::size_t i = 0; i < a.limbs.size(); ++i) {
+        std::uint64_t subtrahend = borrow;
+        if (i < b.limbs.size()) {
+            subtrahend += b.limbs[i];
+        }
+        std::uint64_t cur = a.limbs[i];
+        if (cur < subtrahend) {
+            cur += std::uint64_t{1} << 32;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+        r.limbs.push_back(static_cast<std::uint32_t>(cur - subtrahend));
+    }
+    trim(r.limbs);
+    return r;
 }

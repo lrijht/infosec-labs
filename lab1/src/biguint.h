@@ -14,3 +14,7 @@ std::string to_decimal(const BigUInt &x);
 
 // Returns -1, 0 or 1.
 int compare(const BigUInt &a, const BigUInt &b);
+
+BigUInt add(const BigUInt &a, const BigUInt &b);
+// Requires a >= b, otherwise throws std::invalid_argument.
+BigUInt sub(const BigUInt &a, const BigUInt &b);

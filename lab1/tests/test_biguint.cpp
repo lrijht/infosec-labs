@@ -21,6 +21,12 @@ std::string run(const std::string &op, const std::string &a, const std::string &
     if (op == "sub") {
         return to_decimal(sub(from_decimal(a), from_decimal(b)));
     }
+    if (op == "mul") {
+        return to_decimal(mul(from_decimal(a), from_decimal(b)));
+    }
+    if (op == "sqr") {
+        return to_decimal(sqr(from_decimal(a)));
+    }
     throw std::runtime_error("unknown op: " + op);
 }
 

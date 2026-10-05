@@ -117,3 +117,58 @@ BigUInt sub(const BigUInt &a, const BigUInt &b) {
     trim(r.limbs);
     return r;
 }
+
+BigUInt mul(const BigUInt &a, const BigUInt &b) {
+    BigUInt r;
+    r.limbs.assign(a.limbs.size() + b.limbs.size(), 0);
+    for (std::size_t i = 0; i < a.limbs.size(); ++i) {
+        std::uint64_t carry = 0;
+        for (std::size_t j = 0; j < b.limbs.size(); ++j) {
+            std::uint64_t cur =
+                static_cast<std::uint64_t>(a.limbs[i]) * b.limbs[j] + r.limbs[i + j] + carry;
+            r.limbs[i + j] = static_cast<std::uint32_t>(cur);
+            carry = cur >> 32;
+        }
+        r.limbs[i + b.limbs.size()] = static_cast<std::uint32_t>(carry);
+    }
+    trim(r.limbs);
+    return r;
+}
+
+BigUInt sqr(const BigUInt &a) {
+    const std::size_t n = a.limbs.size();
+    BigUInt r;
+    r.limbs.assign(2 * n, 0);
+
+    for (std::size_t i = 0; i < n; ++i) {
+        std::uint64_t carry = 0;
+        for (std::size_t j = i + 1; j < n; ++j) {
+            std::uint64_t cur =
+                static_cast<std::uint64_t>(a.limbs[i]) * a.limbs[j] + r.limbs[i + j] + carry;
+            r.limbs[i + j] = static_cast<std::uint32_t>(cur);
+            carry = cur >> 32;
+        }
+        r.limbs[i + n] = static_cast<std::uint32_t>(carry);
+    }
+
+    // The cross sum is below a^2 / 2, so doubling it cannot carry out of 2n limbs.
+    std::uint32_t shifted_out = 0;
+    for (std::uint32_t &limb : r.limbs) {
+        std::uint32_t top_bit = limb >> 31;
+        limb = (limb << 1) | shifted_out;
+        shifted_out = top_bit;
+    }
+
+    std::uint64_t carry = 0;
+    for (std::size_t i = 0; i < n; ++i) {
+        std::uint64_t cur =
+            static_cast<std::uint64_t>(a.limbs[i]) * a.limbs[i] + r.limbs[2 * i] + carry;
+        r.limbs[2 * i] = static_cast<std::uint32_t>(cur);
+        cur = (cur >> 32) + r.limbs[2 * i + 1];
+        r.limbs[2 * i + 1] = static_cast<std::uint32_t>(cur);
+        carry = cur >> 32;
+    }
+
+    trim(r.limbs);
+    return r;
+}

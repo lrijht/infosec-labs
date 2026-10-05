@@ -42,6 +42,17 @@ def main():
             lines.append(line("sub", a, b, None, a - b if a >= b else "error"))
     lines.append(line("sub", 2**96, 1, None, 2**96 - 1))
 
+    # All limbs equal to 2^32-1 maximise every carry in mul and sqr.
+    all_ones = [2 ** (32 * k) - 1 for k in range(1, 7)]
+    for a in values:
+        for b in values:
+            lines.append(line("mul", a, b, None, a * b))
+    for a in all_ones:
+        for b in all_ones:
+            lines.append(line("mul", a, b, None, a * b))
+    for a in values + all_ones:
+        lines.append(line("sqr", a, None, None, a * a))
+
     out = Path(__file__).with_name("vectors.txt")
     out.write_text("\n".join(lines) + "\n", newline="\n")
 

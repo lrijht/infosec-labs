@@ -20,3 +20,5 @@ BigUInt add(const BigUInt &a, const BigUInt &b);
 BigUInt sub(const BigUInt &a, const BigUInt &b);
 BigUInt mul(const BigUInt &a, const BigUInt &b);
 BigUInt sqr(const BigUInt &a);
+// Throws std::invalid_argument if m is zero.
+BigUInt mod(const BigUInt &a, const BigUInt &m);

@@ -53,6 +53,18 @@ def main():
     for a in values + all_ones:
         lines.append(line("sqr", a, None, None, a * a))
 
+    for a in values:
+        for m in values:
+            lines.append(line("mod", a, None, m, a % m if m != 0 else "error"))
+    # powmod reduces products of two residues, so dividends reach 100 digits.
+    for _ in range(300):
+        m = random_number(rng, rng.randint(1, 50))
+        if m == 0:
+            continue
+        a = random_number(rng, rng.randint(1, 100))
+        lines.append(line("mod", a, None, m, a % m))
+        lines.append(line("mod", a * m, None, m, 0))
+
     out = Path(__file__).with_name("vectors.txt")
     out.write_text("\n".join(lines) + "\n", newline="\n")
 

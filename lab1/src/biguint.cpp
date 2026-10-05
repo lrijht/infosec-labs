@@ -13,6 +13,18 @@ void trim(std::vector<std::uint32_t> &limbs) {
     }
 }
 
+void shift_left_one(std::vector<std::uint32_t> &limbs) {
+    std::uint32_t shifted_out = 0;
+    for (std::uint32_t &limb : limbs) {
+        std::uint32_t top_bit = limb >> 31;
+        limb = (limb << 1) | shifted_out;
+        shifted_out = top_bit;
+    }
+    if (shifted_out != 0) {
+        limbs.push_back(shifted_out);
+    }
+}
+
 } // namespace
 
 BigUInt from_decimal(const std::string &s) {
@@ -152,12 +164,7 @@ BigUInt sqr(const BigUInt &a) {
     }
 
     // The cross sum is below a^2 / 2, so doubling it cannot carry out of 2n limbs.
-    std::uint32_t shifted_out = 0;
-    for (std::uint32_t &limb : r.limbs) {
-        std::uint32_t top_bit = limb >> 31;
-        limb = (limb << 1) | shifted_out;
-        shifted_out = top_bit;
-    }
+    shift_left_one(r.limbs);
 
     std::uint64_t carry = 0;
     for (std::size_t i = 0; i < n; ++i) {
@@ -170,5 +177,28 @@ BigUInt sqr(const BigUInt &a) {
     }
 
     trim(r.limbs);
+    return r;
+}
+
+BigUInt mod(const BigUInt &a, const BigUInt &m) {
+    if (m.limbs.empty()) {
+        throw std::invalid_argument("mod: modulus is zero");
+    }
+    BigUInt r;
+    for (std::size_t i = a.limbs.size(); i-- > 0;) {
+        for (int bit = 31; bit >= 0; --bit) {
+            shift_left_one(r.limbs);
+            if ((a.limbs[i] >> bit) & 1) {
+                if (r.limbs.empty()) {
+                    r.limbs.push_back(1);
+                } else {
+                    r.limbs[0] |= 1;
+                }
+            }
+            if (compare(r, m) >= 0) {
+                r = sub(r, m);
+            }
+        }
+    }
     return r;
 }

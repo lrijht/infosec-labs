@@ -8,7 +8,8 @@
 
 namespace {
 
-std::string run(const std::string &op, const std::string &a, const std::string &b) {
+std::string run(const std::string &op, const std::string &a, const std::string &b,
+                const std::string &m) {
     if (op == "dec") {
         return to_decimal(from_decimal(a));
     }
@@ -26,6 +27,9 @@ std::string run(const std::string &op, const std::string &a, const std::string &
     }
     if (op == "sqr") {
         return to_decimal(sqr(from_decimal(a)));
+    }
+    if (op == "mod") {
+        return to_decimal(mod(from_decimal(a), from_decimal(m)));
     }
     throw std::runtime_error("unknown op: " + op);
 }
@@ -55,7 +59,7 @@ int main(int argc, char **argv) {
         // Expected failures are written as "error" in the vectors file.
         std::string actual;
         try {
-            actual = run(op, a, b);
+            actual = run(op, a, b, m);
         } catch (const std::invalid_argument &) {
             actual = "error";
         }

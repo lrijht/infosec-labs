@@ -202,3 +202,28 @@ BigUInt mod(const BigUInt &a, const BigUInt &m) {
     }
     return r;
 }
+
+BigUInt powmod(const BigUInt &a, const BigUInt &e, const BigUInt &m,
+               std::vector<PowmodStep> *trace) {
+    const BigUInt base = mod(a, m);
+    // 1 mod m rather than 1, so that m = 1 gives 0 even when e = 0.
+    BigUInt r = mod(BigUInt{{1}}, m);
+
+    std::size_t bit_count = 0;
+    if (!e.limbs.empty()) {
+        bit_count = (e.limbs.size() - 1) * 32;
+        for (std::uint32_t top = e.limbs.back(); top != 0; top >>= 1) {
+            ++bit_count;
+        }
+    }
+
+    for (std::size_t k = bit_count; k-- > 0;) {
+        int bit = static_cast<int>((e.limbs[k / 32] >> (k % 32)) & 1);
+        BigUInt squared = mod(sqr(r), m);
+        r = bit ? mod(mul(squared, base), m) : squared;
+        if (trace) {
+            trace->push_back({k, bit, squared, r});
+        }
+    }
+    return r;
+}

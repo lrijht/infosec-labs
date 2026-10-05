@@ -65,6 +65,21 @@ def main():
         lines.append(line("mod", a, None, m, a % m))
         lines.append(line("mod", a * m, None, m, 0))
 
+    special = [0, 1, 2, 2**32 - 1, 2**32, 10**50 - 1]
+    for a in special:
+        for e in special:
+            for m in special:
+                lines.append(line("powmod", a, e, m, pow(a, e, m) if m != 0 else "error"))
+    for _ in range(300):
+        m = random_number(rng, rng.randint(1, 50))
+        if m == 0:
+            continue
+        a = random_number(rng, rng.randint(1, 50))
+        e = random_number(rng, rng.randint(1, 50))
+        lines.append(line("powmod", a, e, m, pow(a, e, m)))
+        lines.append(line("powmod", a % m, e, m, pow(a % m, e, m)))
+        lines.append(line("powmod", m, e, m, pow(m, e, m)))
+
     out = Path(__file__).with_name("vectors.txt")
     out.write_text("\n".join(lines) + "\n", newline="\n")
 

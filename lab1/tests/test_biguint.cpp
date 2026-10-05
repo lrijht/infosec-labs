@@ -31,6 +31,9 @@ std::string run(const std::string &op, const std::string &a, const std::string &
     if (op == "mod") {
         return to_decimal(mod(from_decimal(a), from_decimal(m)));
     }
+    if (op == "powmod") {
+        return to_decimal(powmod(from_decimal(a), from_decimal(b), from_decimal(m)));
+    }
     throw std::runtime_error("unknown op: " + op);
 }
 
